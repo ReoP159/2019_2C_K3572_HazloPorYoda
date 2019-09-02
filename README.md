@@ -14,7 +14,9 @@ Proyecto plantilla para los trabajos prácticos de la asignatura electiva [Técn
 * [TGC.Core](https://www.nuget.org/packages/TGC.Core/) (se baja automáticamente al hacer build por primera vez)
 
 ## Integrantes ##
-TGC, Tgcito  |  Apellido, Nombre
+Colaiacovo,Juli�n |Olea Polverg, Rodrigo Emanuel
+------------ | -------------
+Masi, Damian|Lobo, Pablo
 ------------ | -------------
 <img src="https://github.com/tgc-utn/tgc-utn.github.io/blob/master/images/robotgc.png" height="500"> | <img src="https://github.com/tgc-utn/tgc-utn.github.io/blob/master/images/trofeotp.png" height="500">
 

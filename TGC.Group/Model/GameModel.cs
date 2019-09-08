@@ -1,5 +1,6 @@
 using Microsoft.DirectX.DirectInput;
 using System.Drawing;
+using System.IO;
 using TGC.Core.Direct3D;
 using TGC.Core.Example;
 using TGC.Core.Geometry;
@@ -31,7 +32,9 @@ namespace TGC.Group.Model
         }
 
         //Caja que se muestra en el ejemplo.
-        private TGCBox Box { get; set; }
+        private TGCBox Box1 { get; set; }
+        private TGCBox Box2 { get; set; }
+        private TGCBox Box3 { get; set; }
 
         //Mesh de TgcLogo.
         private TgcMesh Mesh { get; set; }
@@ -54,8 +57,18 @@ namespace TGC.Group.Model
         {
 
             var loader = new TgcSceneLoader();
-
             var center = TGCVector3.Empty;
+
+            //Setting up de ttoda la scene
+            var destFolder = MediaDir + "Escenario";
+
+            if (!Directory.Exists(destFolder))
+            {
+                Directory.CreateDirectory(destFolder);
+            }
+
+            //var scene = 
+
 
             ship = loader.loadSceneFromFile(MediaDir + "StarWars-YWing\\StarWars-YWing-TgcScene.xml").Meshes[0];
             ship.Rotation += new TGCVector3(0, FastMath.PI_HALF, 0);
@@ -67,19 +80,22 @@ namespace TGC.Group.Model
 
             //Textura de la carperta Media. Game.Default es un archivo de configuracion (Game.settings) util para poner cosas.
             //Pueden abrir el Game.settings que se ubica dentro de nuestro proyecto para configurar.
-            var pathTexturaCaja = MediaDir + Game.Default.TexturaCaja;
+            var pathTexturaCaja = MediaDir + "StarWars-ATAT\\Textures\\BlackMetalTexture.jpg";
 
             //Cargamos una textura, tener en cuenta que cargar una textura significa crear una copia en memoria.
             //Es importante cargar texturas en Init, si se hace en el render loop podemos tener grandes problemas si instanciamos muchas.
             var texture = TgcTexture.createTexture(pathTexturaCaja);
             
             //Creamos una caja 3D ubicada de dimensiones (5, 10, 5) y la textura como color.
-            var size = new TGCVector3(5, 10, 5);
+            var size_lados = new TGCVector3(10, 100, 160);
+            var size_suelo = new TGCVector3(100, 10, 160);
             //Construimos una caja según los parámetros, por defecto la misma se crea con centro en el origen y se recomienda así para facilitar las transformaciones.
-            Box = TGCBox.fromSize(size, texture);
-            //Posición donde quiero que este la caja, es común que se utilicen estructuras internas para las transformaciones.
-            //Entonces actualizamos la posición lógica, luego podemos utilizar esto en render para posicionar donde corresponda con transformaciones.
-            Box.Position = new TGCVector3(-25, 0, 0);
+            Box1 = TGCBox.fromSize(size_lados, texture);
+            Box1.Transform = TGCMatrix.Translation(new TGCVector3(50, 0, -80));
+            Box2 = TGCBox.fromSize(size_lados, texture);
+            Box2.Transform = TGCMatrix.Translation(new TGCVector3(-50, 0, -80));
+            Box3 = TGCBox.fromSize(size_suelo, texture);
+            Box3.Transform = TGCMatrix.Translation(new TGCVector3(0, -50, -80));
 
             ship.Scale = new TGCVector3(0.7f, 0.7f, 0.7f);
 
@@ -173,7 +189,9 @@ namespace TGC.Group.Model
             //Box.Transform = TGCMatrix.Scaling(Box.Scale) * TGCMatrix.RotationYawPitchRoll(Box.Rotation.Y, Box.Rotation.X, Box.Rotation.Z) * TGCMatrix.Translation(Box.Position);
             //A modo ejemplo realizamos toda las multiplicaciones, pero aquí solo nos hacia falta la traslación.
             //Finalmente invocamos al render de la caja
-            Box.Render();
+            Box1.Render();
+            Box2.Render();
+            Box3.Render();
 
             //Cuando tenemos modelos mesh podemos utilizar un método que hace la matriz de transformación estándar.
             //Es útil cuando tenemos transformaciones simples, pero OJO cuando tenemos transformaciones jerárquicas o complicadas.
@@ -184,7 +202,7 @@ namespace TGC.Group.Model
             //Render de BoundingBox, muy útil para debug de colisiones.
             if (BoundingBox)
             {
-                Box.BoundingBox.Render();
+                Box1.BoundingBox.Render();
                 ship.BoundingBox.Render();
             }
 
@@ -200,7 +218,9 @@ namespace TGC.Group.Model
         public override void Dispose()
         {
             //Dispose de la caja.
-            Box.Dispose();
+            Box1.Dispose();
+            Box2.Dispose();
+            Box3.Dispose();
             //Dispose del mesh.
             ship.Dispose();
         }

@@ -1,6 +1,6 @@
 using Microsoft.DirectX.DirectInput;
 using System.Drawing;
-using System.IO;
+using System.Collections.Generic;
 using TGC.Core.Direct3D;
 using TGC.Core.Example;
 using TGC.Core.Geometry;
@@ -8,6 +8,8 @@ using TGC.Core.Input;
 using TGC.Core.Mathematica;
 using TGC.Core.SceneLoader;
 using TGC.Core.Textures;
+using TGC.Core.Camara;
+
 
 namespace TGC.Group.Model
 {
@@ -36,15 +38,71 @@ namespace TGC.Group.Model
         private TGCBox Box2 { get; set; }
         private TGCBox Box3 { get; set; }
 
+        private class Track
+        {
+            private List<TgcPlane> walls_l;
+            private List<TgcPlane> walls_r;
+            private List<TgcPlane> floor;
+            public int repeat;
+            public TGCVector3 center;
+
+            public Track(TGCVector3 centro, string pathTextura, int repeticiones)
+            {
+                repeat = repeticiones;
+                center = centro;
+
+                var size_lados = new TGCVector3(0, 160, 160);
+                var size_suelo = new TGCVector3(100, 0, 160);
+
+                var texture = TgcTexture.createTexture(pathTextura);
+
+                walls_l = new List<TgcPlane>();
+                walls_r = new List<TgcPlane>();
+                floor = new List<TgcPlane>();
+
+                for(int i = 0; i < repeticiones; i++)
+                {
+                    walls_l.Add(new TgcPlane(center + new TGCVector3(-50, -80, -80-(i*160)), size_lados, TgcPlane.Orientations.YZplane, texture));
+                    walls_r.Add(new TgcPlane(center + new TGCVector3(50, -80, -80-(i * 160)), size_lados, TgcPlane.Orientations.YZplane, texture));
+                    floor.Add(new TgcPlane(center + new TGCVector3(-50, -80, -80-(i * 160)), size_suelo, TgcPlane.Orientations.XZplane, texture));
+                }
+            }
+
+            public void Render()
+            {
+                foreach (var plane in walls_l) { plane.Render();}
+                foreach (var plane in walls_r) { plane.Render(); }
+                foreach (var plane in floor) { plane.Render(); }
+            }
+            public void Dispose()
+            {
+                foreach (var plane in walls_l) { plane.Dispose(); }
+                foreach (var plane in walls_r) { plane.Dispose(); }
+                foreach (var plane in floor) { plane.Dispose(); }
+            }
+
+        }
+
         //Mesh de TgcLogo.
         private TgcMesh Mesh { get; set; }
 
         //Boleano para ver si dibujamos el boundingbox
         private bool BoundingBox { get; set; }
 
+        //private TgcScene scene;
+
+        private Track pista;
+
         private TgcMesh ship;
+        //private float side_acceleration = 5f;
         private float side_speed = 70F;
-        private float forward_speed = 30F;
+
+        private TGCVector3 forward_movement = TGCVector3.Empty;
+
+        private float max_forward_speed = 200F;
+        private float forward_acceleration = 80F;
+        private float forward_speed = 0;
+        private float break_constant = 3f; //Constante por la cual se multiplica para que frene más rápido de lo que acelera
 
 
         /// <summary>
@@ -59,43 +117,18 @@ namespace TGC.Group.Model
             var loader = new TgcSceneLoader();
             var center = TGCVector3.Empty;
 
-            //Setting up de ttoda la scene
-            var destFolder = MediaDir + "Escenario";
-
-            if (!Directory.Exists(destFolder))
-            {
-                Directory.CreateDirectory(destFolder);
-            }
-
-            //var scene = 
-
-
             ship = loader.loadSceneFromFile(MediaDir + "StarWars-YWing\\StarWars-YWing-TgcScene.xml").Meshes[0];
             ship.Rotation += new TGCVector3(0, FastMath.PI_HALF, 0);
             ship.Position = new TGCVector3(0, 0, 0);
             ship.Transform = TGCMatrix.Scaling(TGCVector3.One) * TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
 
-            //Device de DirectX para crear primitivas.
-            var d3dDevice = D3DDevice.Instance.Device;
 
-            //Textura de la carperta Media. Game.Default es un archivo de configuracion (Game.settings) util para poner cosas.
-            //Pueden abrir el Game.settings que se ubica dentro de nuestro proyecto para configurar.
-            var pathTexturaCaja = MediaDir + "StarWars-ATAT\\Textures\\BlackMetalTexture.jpg";
+            var pathTextura = MediaDir + "StarWars-ATAT\\Textures\\BlackMetalTexture.jpg";
 
-            //Cargamos una textura, tener en cuenta que cargar una textura significa crear una copia en memoria.
-            //Es importante cargar texturas en Init, si se hace en el render loop podemos tener grandes problemas si instanciamos muchas.
-            var texture = TgcTexture.createTexture(pathTexturaCaja);
-            
-            //Creamos una caja 3D ubicada de dimensiones (5, 10, 5) y la textura como color.
-            var size_lados = new TGCVector3(10, 100, 160);
-            var size_suelo = new TGCVector3(100, 10, 160);
-            //Construimos una caja según los parámetros, por defecto la misma se crea con centro en el origen y se recomienda así para facilitar las transformaciones.
-            Box1 = TGCBox.fromSize(size_lados, texture);
-            Box1.Transform = TGCMatrix.Translation(new TGCVector3(50, 0, -80));
-            Box2 = TGCBox.fromSize(size_lados, texture);
-            Box2.Transform = TGCMatrix.Translation(new TGCVector3(-50, 0, -80));
-            Box3 = TGCBox.fromSize(size_suelo, texture);
-            Box3.Transform = TGCMatrix.Translation(new TGCVector3(0, -50, -80));
+            var texture = TgcTexture.createTexture(pathTextura);
+            pista = new Track(center, pathTextura,4);
+
+
 
             ship.Scale = new TGCVector3(0.7f, 0.7f, 0.7f);
 
@@ -123,7 +156,8 @@ namespace TGC.Group.Model
             PreUpdate();
 
             var side_movement = TGCVector3.Empty;
-            var forward_movement = TGCVector3.Empty;
+            forward_movement = new TGCVector3(0,0,-1);
+
 
             //Capturar Input teclado
 
@@ -154,7 +188,12 @@ namespace TGC.Group.Model
 
             if (Input.keyDown(Key.Space))
             {
-                forward_movement.Z = -1;
+                forward_speed = FastMath.Min(forward_speed + forward_acceleration * ElapsedTime,max_forward_speed);
+                //forward_movement.Z = -1;
+            }
+            else
+            {
+                forward_speed = FastMath.Max(forward_speed-forward_acceleration*break_constant*ElapsedTime,0);
             }
 
             side_movement *= side_speed * ElapsedTime;
@@ -183,15 +222,16 @@ namespace TGC.Group.Model
             //Dibuja un texto por pantalla
             DrawText.drawText("Con la tecla F se dibuja el bounding box.", 0, 20, Color.OrangeRed);
             DrawText.drawText("Con clic izquierdo subimos la camara [Actual]: " + TGCVector3.PrintVector3(Camara.Position), 0, 30, Color.OrangeRed);
+            //DrawText.drawText("ElapsetTime: " + ElapsedTime,0,40, Color.OrangeRed);
+            DrawText.drawText("Velocidad: " + forward_speed +"F", 0, 40, Color.OrangeRed);
 
             //Siempre antes de renderizar el modelo necesitamos actualizar la matriz de transformacion.
             //Debemos recordar el orden en cual debemos multiplicar las matrices, en caso de tener modelos jerárquicos, tenemos control total.
             //Box.Transform = TGCMatrix.Scaling(Box.Scale) * TGCMatrix.RotationYawPitchRoll(Box.Rotation.Y, Box.Rotation.X, Box.Rotation.Z) * TGCMatrix.Translation(Box.Position);
             //A modo ejemplo realizamos toda las multiplicaciones, pero aquí solo nos hacia falta la traslación.
             //Finalmente invocamos al render de la caja
-            Box1.Render();
-            Box2.Render();
-            Box3.Render();
+
+            pista.Render();
 
             //Cuando tenemos modelos mesh podemos utilizar un método que hace la matriz de transformación estándar.
             //Es útil cuando tenemos transformaciones simples, pero OJO cuando tenemos transformaciones jerárquicas o complicadas.
@@ -217,12 +257,10 @@ namespace TGC.Group.Model
         /// </summary>
         public override void Dispose()
         {
-            //Dispose de la caja.
-            Box1.Dispose();
-            Box2.Dispose();
-            Box3.Dispose();
+
             //Dispose del mesh.
             ship.Dispose();
+            pista.Dispose();
         }
     }
 }

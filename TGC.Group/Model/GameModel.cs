@@ -38,51 +38,6 @@ namespace TGC.Group.Model
         private TGCBox Box2 { get; set; }
         private TGCBox Box3 { get; set; }
 
-        private class Track
-        {
-            private List<TgcPlane> walls_l;
-            private List<TgcPlane> walls_r;
-            private List<TgcPlane> floor;
-            public int repeat;
-            public TGCVector3 center;
-
-            public Track(TGCVector3 centro, string pathTextura, int repeticiones)
-            {
-                repeat = repeticiones;
-                center = centro;
-
-                var size_lados = new TGCVector3(0, 160, 160);
-                var size_suelo = new TGCVector3(100, 0, 160);
-
-                var texture = TgcTexture.createTexture(pathTextura);
-
-                walls_l = new List<TgcPlane>();
-                walls_r = new List<TgcPlane>();
-                floor = new List<TgcPlane>();
-
-                for(int i = 0; i < repeticiones; i++)
-                {
-                    walls_l.Add(new TgcPlane(center + new TGCVector3(-50, -80, -80-(i*160)), size_lados, TgcPlane.Orientations.YZplane, texture));
-                    walls_r.Add(new TgcPlane(center + new TGCVector3(50, -80, -80-(i * 160)), size_lados, TgcPlane.Orientations.YZplane, texture));
-                    floor.Add(new TgcPlane(center + new TGCVector3(-50, -80, -80-(i * 160)), size_suelo, TgcPlane.Orientations.XZplane, texture));
-                }
-            }
-
-            public void Render()
-            {
-                foreach (var plane in walls_l) { plane.Render();}
-                foreach (var plane in walls_r) { plane.Render(); }
-                foreach (var plane in floor) { plane.Render(); }
-            }
-            public void Dispose()
-            {
-                foreach (var plane in walls_l) { plane.Dispose(); }
-                foreach (var plane in walls_r) { plane.Dispose(); }
-                foreach (var plane in floor) { plane.Dispose(); }
-            }
-
-        }
-
         //Mesh de TgcLogo.
         private TgcMesh Mesh { get; set; }
 
@@ -104,7 +59,6 @@ namespace TGC.Group.Model
         private float forward_speed = 0;
         private float break_constant = 3f; //Constante por la cual se multiplica para que frene más rápido de lo que acelera
 
-
         /// <summary>
         ///     Se llama una sola vez, al principio cuando se ejecuta el ejemplo.
         ///     Escribir aquí todo el código de inicialización: cargar modelos, texturas, estructuras de optimización, todo
@@ -116,9 +70,9 @@ namespace TGC.Group.Model
 
             var loader = new TgcSceneLoader();
             var center = TGCVector3.Empty;
-
+            
             ship = loader.loadSceneFromFile(MediaDir + "StarWars-YWing\\StarWars-YWing-TgcScene.xml").Meshes[0];
-            ship.Rotation += new TGCVector3(0, FastMath.PI_HALF, 0);
+            ship.Rotation = new TGCVector3(0, FastMath.PI_HALF, 0);
             ship.Position = new TGCVector3(0, 0, 0);
             ship.Transform = TGCMatrix.Scaling(TGCVector3.One) * TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
 
@@ -126,7 +80,7 @@ namespace TGC.Group.Model
             var pathTextura = MediaDir + "StarWars-ATAT\\Textures\\BlackMetalTexture.jpg";
 
             var texture = TgcTexture.createTexture(pathTextura);
-            pista = new Track(center, pathTextura,4);
+            this.pista = new Track(center, pathTextura,4);
 
 
 
@@ -198,7 +152,8 @@ namespace TGC.Group.Model
 
             side_movement *= side_speed * ElapsedTime;
             forward_movement *= forward_speed * ElapsedTime;
-            ship.Move(side_movement+forward_movement);
+            ship.Position += side_movement + forward_movement;
+            ship.Transform = TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
 
             //Para seguir a la nave
             var dis_camara_nave = new TGCVector3(0, 10, 125);
@@ -221,7 +176,7 @@ namespace TGC.Group.Model
             ship.Render();
             //Dibuja un texto por pantalla
             DrawText.drawText("Con la tecla F se dibuja el bounding box.", 0, 20, Color.OrangeRed);
-            DrawText.drawText("Con clic izquierdo subimos la camara [Actual]: " + TGCVector3.PrintVector3(Camara.Position), 0, 30, Color.OrangeRed);
+            //DrawText.drawText("Con clic izquierdo subimos la camara [Actual]: " + TGCVector3.PrintVector3(Camara.Position), 0, 30, Color.OrangeRed);
             //DrawText.drawText("ElapsetTime: " + ElapsedTime,0,40, Color.OrangeRed);
             DrawText.drawText("Velocidad: " + forward_speed +"F", 0, 40, Color.OrangeRed);
 
@@ -242,7 +197,6 @@ namespace TGC.Group.Model
             //Render de BoundingBox, muy útil para debug de colisiones.
             if (BoundingBox)
             {
-                Box1.BoundingBox.Render();
                 ship.BoundingBox.Render();
             }
 

@@ -21,35 +21,20 @@ namespace TGC.Group.Model
     /// </summary>
     public class GameModel : TgcExample
     {
-        /// <summary>
-        ///     Constructor del juego.
-        /// </summary>
-        /// <param name="mediaDir">Ruta donde esta la carpeta con los assets</param>
-        /// <param name="shadersDir">Ruta donde esta la carpeta con los shaders</param>
+        //constructor de la aplicacion
         public GameModel(string mediaDir, string shadersDir) : base(mediaDir, shadersDir)
         {
-            Category = Game.Default.Category;
-            Name = Game.Default.Name;
-            Description = Game.Default.Description;
+            Category = "Naves";
+            Name = "Hazlo por Yoda";
+            Description = "Juego de Naves";
         }
 
-        //Caja que se muestra en el ejemplo.
-        private TGCBox Box1 { get; set; }
-        private TGCBox Box2 { get; set; }
-        private TGCBox Box3 { get; set; }
-
-        //Mesh de TgcLogo.
-        private TgcMesh Mesh { get; set; }
-
-        //Boleano para ver si dibujamos el boundingbox
-        private bool BoundingBox { get; set; }
-
-        //private TgcScene scene;
-
-        private Track pista;
-
+        //variable para cargar la nave
         private TgcMesh ship;
-        //private float side_acceleration = 5f;
+
+        //-------variables adicionales para la nave
+
+        /*private float side_acceleration = 5f;*/
         private float side_speed = 70F;
 
         private TGCVector3 forward_movement = TGCVector3.Empty;
@@ -59,6 +44,16 @@ namespace TGC.Group.Model
         private float forward_speed = 0;
         private float break_constant = 3f; //Constante por la cual se multiplica para que frene más rápido de lo que acelera
 
+        //-----------------------------------------
+
+        //variable para cargar la escena 
+        private TgcScene scene;
+
+        //variable para el boundingbox (caja de coliciones)
+        private bool BoundingBox { get; set; }
+
+        //private Track pista;
+
         /// <summary>
         ///     Se llama una sola vez, al principio cuando se ejecuta el ejemplo.
         ///     Escribir aquí todo el código de inicialización: cargar modelos, texturas, estructuras de optimización, todo
@@ -67,37 +62,31 @@ namespace TGC.Group.Model
         /// </summary>
         public override void Init()
         {
+            //-------ESCENA--------//
+            var loader = new TgcSceneLoader(); //clase para cargar el terreno
+            var center = TGCVector3.Empty; //posicion inicial para la scene
+            scene = loader.loadSceneFromFile(MediaDir + "Selva\\Selva-TgcScene.xml");
 
-            var loader = new TgcSceneLoader();
-            var center = TGCVector3.Empty;
-            
-            ship = loader.loadSceneFromFile(MediaDir + "StarWars-YWing\\StarWars-YWing-TgcScene.xml").Meshes[0];
+
+            //-------NAVE--------//
+            ship = loader.loadSceneFromFile(MediaDir + "StarWars-Speeder\\StarWars-Speeder-TgcScene.xml").Meshes[0];
             ship.Rotation = new TGCVector3(0, FastMath.PI_HALF, 0);
             ship.Position = new TGCVector3(0, 0, 0);
             ship.Transform = TGCMatrix.Scaling(TGCVector3.One) * TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
 
-
             var pathTextura = MediaDir + "StarWars-ATAT\\Textures\\BlackMetalTexture.jpg";
 
             var texture = TgcTexture.createTexture(pathTextura);
-            this.pista = new Track(center, pathTextura,4);
-
-
+            //this.pista = new Track(center, pathTextura,4);
 
             ship.Scale = new TGCVector3(0.7f, 0.7f, 0.7f);
 
-            //Suelen utilizarse objetos que manejan el comportamiento de la camara.
-            //Lo que en realidad necesitamos gráficamente es una matriz de View.
-            //El framework maneja una cámara estática, pero debe ser inicializada.
-            //Posición de la camara.
-            var cameraPosition = new TGCVector3(0, 0, 125);
-            //Quiero que la camara mire hacia el origen (0,0,0).
+            //-------CAMARA--------//
+            /**var cameraPosition = new TGCVector3(0, 0, 125);
             var lookAt = TGCVector3.Empty;
-            //Configuro donde esta la posicion de la camara y hacia donde mira.
-            Camara.SetCamera(cameraPosition, lookAt);
-            //Internamente el framework construye la matriz de view con estos dos vectores.
-            //Luego en nuestro juego tendremos que crear una cámara que cambie la matriz de view con variables como movimientos o animaciones de escenas.
-
+            Camara.SetCamera(cameraPosition, lookAt);*/
+            Camara = new TgcRotationalCamera(ship.BoundingBox.calculateBoxCenter(), ship.BoundingBox.calculateBoxRadius() * 6, Input);
+            
         }
 
         /// <summary>
@@ -170,29 +159,31 @@ namespace TGC.Group.Model
         /// </summary>
         public override void Render()
         {
-            //Inicio el render de la escena, para ejemplos simples. Cuando tenemos postprocesado o shaders es mejor realizar las operaciones según nuestra conveniencia.
+        
             PreRender();
 
-            ship.Render();
+            
             //Dibuja un texto por pantalla
             DrawText.drawText("Con la tecla F se dibuja el bounding box.", 0, 20, Color.OrangeRed);
-            //DrawText.drawText("Con clic izquierdo subimos la camara [Actual]: " + TGCVector3.PrintVector3(Camara.Position), 0, 30, Color.OrangeRed);
-            //DrawText.drawText("ElapsetTime: " + ElapsedTime,0,40, Color.OrangeRed);
             DrawText.drawText("Velocidad: " + forward_speed +"F", 0, 40, Color.OrangeRed);
+            DrawText.drawText("Posicion de la nave: " + ship.Position, 0, 60, Color.OrangeRed);
 
             //Siempre antes de renderizar el modelo necesitamos actualizar la matriz de transformacion.
             //Debemos recordar el orden en cual debemos multiplicar las matrices, en caso de tener modelos jerárquicos, tenemos control total.
             //Box.Transform = TGCMatrix.Scaling(Box.Scale) * TGCMatrix.RotationYawPitchRoll(Box.Rotation.Y, Box.Rotation.X, Box.Rotation.Z) * TGCMatrix.Translation(Box.Position);
             //A modo ejemplo realizamos toda las multiplicaciones, pero aquí solo nos hacia falta la traslación.
             //Finalmente invocamos al render de la caja
-
-            pista.Render();
-
             //Cuando tenemos modelos mesh podemos utilizar un método que hace la matriz de transformación estándar.
             //Es útil cuando tenemos transformaciones simples, pero OJO cuando tenemos transformaciones jerárquicas o complicadas.
             //Mesh.UpdateMeshTransform();
             //Render del mesh
             //Mesh.Render();
+
+            //pista.Render();
+            ship.Render();
+            scene.RenderAll();
+
+            
 
             //Render de BoundingBox, muy útil para debug de colisiones.
             if (BoundingBox)
@@ -200,7 +191,6 @@ namespace TGC.Group.Model
                 ship.BoundingBox.Render();
             }
 
-            //Finaliza el render y presenta en pantalla, al igual que el preRender se debe para casos puntuales es mejor utilizar a mano las operaciones de EndScene y PresentScene
             PostRender();
         }
 
@@ -211,10 +201,8 @@ namespace TGC.Group.Model
         /// </summary>
         public override void Dispose()
         {
-
-            //Dispose del mesh.
             ship.Dispose();
-            pista.Dispose();
+            scene.DisposeAll();
         }
     }
 }

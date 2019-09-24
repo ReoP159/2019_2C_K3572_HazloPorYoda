@@ -1,0 +1,156 @@
+[33mcommit b85c11adbdb1b78248f24855c9b3bd442a47a96f[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: damianmasi <38141315+damianmasi@users.noreply.github.com>
+Date:   Tue Sep 17 16:01:54 2019 -0300
+
+    agregue y saque comentarios para hacerlo mas claro, puse una camara de los ejemplos para que sea mas comodo hacer pruebas mientras no hagamos la camara, le puse un escenario (explicacion por whattsap) y le cambie la nave
+
+[33mcommit 1f127d1c6cbd6c1836ad60caf2de6c4f83464574[m[33m ([m[1;33mtag: v1.0[m[33m)[m
+Author: julian <julian.colaiacovo@gmail.com>
+Date:   Tue Sep 10 05:19:51 2019 -0300
+
+    Muevo la nave junto con la camara
+
+[33mcommit 0d1cc3207750b7ca0fa9c516ff8bd5e0f002fcdb[m
+Author: ReoP159 <rodri_olea@hotmail.com>
+Date:   Sun Sep 8 23:21:23 2019 -0300
+
+    Agregué la pista e hice que la nave acelere en vez de avanzar a velocidad constante. La pista es una estructura, habría que ver si puede hacerse una TGCScene y corregir las texturas de las paredes
+
+[33mcommit 007125c3ce6719800898a09dcbb16523d024b774[m
+Author: ReoP159 <rodri_olea@hotmail.com>
+Date:   Sun Sep 8 14:40:59 2019 -0300
+
+    Agregué los lados como cajas con textura, por ahora son solo boxes
+
+[33mcommit 9570597b153d4d56b9acc2bf0def31a6838d94da[m
+Author: ReoP159 <rodri_olea@hotmail.com>
+Date:   Sun Sep 8 02:37:54 2019 -0300
+
+    Solo carga el modelo de la nave, se mueve con WASD y acelera con Espacio. Tambien la cámara sigue a la nave. Los controles como siempre están a discusión
+
+[33mcommit f1b2e05dcb122e40a8fc5aa5f3debbd4fd9b3c7f[m
+Author: Rodrigo E. Olea Polverg <rodri_olea@hotmail.com>
+Date:   Mon Sep 2 17:49:13 2019 -0300
+
+    Agregados los nomrbes
+    
+    Corregido
+
+[33mcommit 0207e95e376e55d37492361d53e2a91d49eaca6f[m
+Author: ReoP159 <rodri_olea@hotmail.com>
+Date:   Mon Sep 2 17:45:27 2019 -0300
+
+    Agregados los nombres
+
+[33mcommit e3c2475210c68f2c156c4edbae6677bfcf32f2e2[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Tue Apr 23 00:19:24 2019 -0300
+
+    Update TGC.Core, BulletSharp, DotNet Framework y se agrega perfil x86
+
+[33mcommit 6d5304201a1f2ef4c5dcba4145a388724050106a[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Sat Sep 15 16:18:39 2018 -0300
+
+    Arreglo para Direct3DX y codigo para full screen
+    
+    * Se agrego que sea SpecificVersion para Direct3DX para intentar evitar el problema que no siempre resuelve la ultima version de la misma.
+    * En la clase GameForm se puso comentado el codigo que hace que el Winform sea full screen.
+
+[33mcommit 0fde56379cbd55df93e87d08220e850ef523abd3[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Sat Sep 15 15:24:38 2018 -0300
+
+    Update TGC.Core dependency
+
+[33mcommit c4c2c187b2b901405bae2fb5ad6724e69386ef73[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Tue Mar 27 21:53:31 2018 -0300
+
+    Update TGC.Core dependency
+
+[33mcommit 40669567c2257a2cc495dc89f4a2602f65db1d0b[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Fri Mar 17 23:04:28 2017 -0300
+
+    Se actualizo el Readme y la versión de TGCCore.
+
+[33mcommit b6009cfe8e8095205586247506c78a4848beb0b3[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Sat Aug 13 15:23:19 2016 -0300
+
+    Update Xamarin Studio links
+
+[33mcommit 29806048dd186973ee0290b963d10b06f1cf2534[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Fri Aug 12 17:43:50 2016 -0300
+
+    Todo listo! :smile:
+
+[33mcommit 63d75220589566cc9660d0e4700f7039262afc3b[m
+Author: Rodrigo Garcia <mysery@gmail.com>
+Date:   Fri Aug 12 13:51:41 2016 -0300
+
+    Se agregan algunos comentarios y un poquito de mejora en los ejemplos.
+
+[33mcommit ae6067b72b4d743b28dfd477d936762013438aff[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Thu Aug 11 23:42:20 2016 -0300
+
+    Se actualiza a la nueva version de TGC.Core.
+
+[33mcommit 7fb9bbaaf407349120b4aa2fd7e43f301321d779[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Mon Aug 1 17:22:24 2016 -0300
+
+    Probando cosas en el readme y ci
+
+[33mcommit f98069b930a6bf3d438a621c1f881549565c8750[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Mon Aug 1 15:59:16 2016 -0300
+
+    Actualización del README y corrección en GameModel
+
+[33mcommit 8f593e1edceafa63107290cc6d5b84ec885b15e2[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Mon Aug 1 09:52:43 2016 -0300
+
+    Update README.md
+
+[33mcommit 98ad89345d39439d95c3536b3afc159ea99cfee8[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Mon Aug 1 08:38:30 2016 -0300
+
+    Quitando referencia estatica a TGC.Core y agregando dependencia NuGet
+
+[33mcommit 2d111b30caedc6856088d8c73e61ec45a979ab4d[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Fri Jul 1 18:45:52 2016 -0300
+
+    Agrego el logo de tgc al render
+
+[33mcommit f194b95daa06df034207c0ecc3923e8a02c86985[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Fri Jul 1 18:33:03 2016 -0300
+
+    Refactor para soportar la nueva versión de core
+
+[33mcommit d008e15ab6787c89467c0a02c8ad52594d37ff6c[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Sat Jun 18 11:36:48 2016 -0300
+
+    Se adapta a la nueva versión de TGC.Core
+
+[33mcommit 68e9893834f288b51677ca1717e9ee866a682ac1[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Fri Jun 3 19:29:11 2016 -0300
+
+    Update Readme
+    
+    Como aun no existe la dependencia Nuget de TGC.Core.dll hay que agregarla a mano.
+
+[33mcommit 3ef047feaba0cd8313dacf14beb7c83a89bc6388[m
+Author: René Juan Rico Mendoza <rejurime@gmail.com>
+Date:   Fri Jun 3 18:57:46 2016 -0300
+
+    Proyecto simplificado para poder hacer el tp :smile:

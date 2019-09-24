@@ -1,14 +1,9 @@
 using Microsoft.DirectX.DirectInput;
 using System.Drawing;
-using System.Collections.Generic;
-using TGC.Core.Direct3D;
 using TGC.Core.Example;
-using TGC.Core.Geometry;
-using TGC.Core.Input;
 using TGC.Core.Mathematica;
 using TGC.Core.SceneLoader;
-using TGC.Core.Textures;
-using TGC.Core.Camara;
+
 
 
 namespace TGC.Group.Model
@@ -52,7 +47,10 @@ namespace TGC.Group.Model
         //variable para el boundingbox (caja de coliciones)
         private bool BoundingBox { get; set; }
 
-        //private Track pista;
+        //variable para la camara;
+
+        private CamaraNave camera;
+        private int posicionCamara = 0;
 
         /// <summary>
         ///     Se llama una sola vez, al principio cuando se ejecuta el ejemplo.
@@ -70,23 +68,15 @@ namespace TGC.Group.Model
 
             //-------NAVE--------//
             ship = loader.loadSceneFromFile(MediaDir + "StarWars-Speeder\\StarWars-Speeder-TgcScene.xml").Meshes[0];
-            ship.Rotation = new TGCVector3(0, FastMath.PI_HALF, 0);
-            ship.Position = new TGCVector3(0, 0, 0);
-            ship.Transform = TGCMatrix.Scaling(TGCVector3.One) * TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
-
-            var pathTextura = MediaDir + "StarWars-ATAT\\Textures\\BlackMetalTexture.jpg";
-
-            var texture = TgcTexture.createTexture(pathTextura);
-            //this.pista = new Track(center, pathTextura,4);
-
-            ship.Scale = new TGCVector3(0.7f, 0.7f, 0.7f);
-
+            ship.Position = new TGCVector3(0, 600, 0);
+            ship.Rotation = new TGCVector3(0, FastMath.PI/2, 0);
+           
             //-------CAMARA--------//
-            /**var cameraPosition = new TGCVector3(0, 0, 125);
-            var lookAt = TGCVector3.Empty;
-            Camara.SetCamera(cameraPosition, lookAt);*/
-            Camara = new TgcRotationalCamera(ship.BoundingBox.calculateBoxCenter(), ship.BoundingBox.calculateBoxRadius() * 6, Input);
-            
+
+            camera = new CamaraNave(ship.Position,0);
+            Camara = camera;
+
+
         }
 
         /// <summary>
@@ -103,12 +93,12 @@ namespace TGC.Group.Model
 
 
             //Capturar Input teclado
-
+            ///Bounding-----------------
             if (Input.keyPressed(Key.F))
             {
                 BoundingBox = !BoundingBox;
             }
-
+            ///Movimiento-------------------
             if (Input.keyDown(Key.S))
             {
                 side_movement.Y = -1;
@@ -128,7 +118,7 @@ namespace TGC.Group.Model
             {
                 side_movement.X = 1;
             }
-
+            ///Aceleracion -----------------------
             if (Input.keyDown(Key.Space))
             {
                 forward_speed = FastMath.Min(forward_speed + forward_acceleration * ElapsedTime,max_forward_speed);
@@ -139,15 +129,28 @@ namespace TGC.Group.Model
                 forward_speed = FastMath.Max(forward_speed-forward_acceleration*break_constant*ElapsedTime,0);
             }
 
+            ///cambio posicion camara -----------------------
+            if (Input.keyPressed(Key.C))
+            {
+                posicionCamara += 1;
+                if(posicionCamara > 2)
+                {
+                    posicionCamara = 0;
+                }
+            }
+            camera.CambiarPosicionCamara(posicionCamara);
+            
+            
             side_movement *= side_speed * ElapsedTime;
+            
             forward_movement *= forward_speed * ElapsedTime;
             ship.Position += side_movement + forward_movement;
+            
             ship.Transform = TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
 
-            //Para seguir a la nave
-            var dis_camara_nave = new TGCVector3(0, 10, 125);
-            Camara.SetCamera(ship.Position + dis_camara_nave, ship.Position);
+            camera.Target = ship.Position;
             
+
 
             PostUpdate();
         }
@@ -162,11 +165,16 @@ namespace TGC.Group.Model
         
             PreRender();
 
-            
+
             //Dibuja un texto por pantalla
-            DrawText.drawText("Con la tecla F se dibuja el bounding box.", 0, 20, Color.OrangeRed);
-            DrawText.drawText("Velocidad: " + forward_speed +"F", 0, 40, Color.OrangeRed);
-            DrawText.drawText("Posicion de la nave: " + ship.Position, 0, 60, Color.OrangeRed);
+            DrawText.drawText("/--INTRUCCIONES------------",0,20,Color.LightYellow);
+            DrawText.drawText("Con la tecla F se dibuja el bounding box.",0,35, Color.LightYellow);
+            DrawText.drawText("Con la tecla C se cambia la posicion de la camara",0,50, Color.LightYellow);
+            DrawText.drawText("/--DATOS-------------------", 0,80, Color.LightYellow);
+            DrawText.drawText("Velocidad: " + forward_speed +"F",0,95, Color.LightYellow);
+            DrawText.drawText("Posicion de la nave: X: " + ship.Position.X +
+                                " Y: " + ship.Position.Y + " Z: " + ship.Position.Z, 0,110, Color.LightYellow);
+            
 
             //Siempre antes de renderizar el modelo necesitamos actualizar la matriz de transformacion.
             //Debemos recordar el orden en cual debemos multiplicar las matrices, en caso de tener modelos jerárquicos, tenemos control total.

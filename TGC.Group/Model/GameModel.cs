@@ -3,6 +3,8 @@ using System.Drawing;
 using TGC.Core.Example;
 using TGC.Core.Mathematica;
 using TGC.Core.SceneLoader;
+using TGC.Core.Terrain;
+
 
 
 
@@ -26,18 +28,19 @@ namespace TGC.Group.Model
 
         //variable para cargar la nave
         private TgcMesh ship;
+        private TgcSkyBox skyBox;
 
         //-------variables adicionales para la nave
 
         /*private float side_acceleration = 5f;*/
-        private float side_speed = 70F;
+        private float side_speed = 100F;
 
         private TGCVector3 forward_movement = TGCVector3.Empty;
 
-        private float max_forward_speed = 200F;
+        private float max_forward_speed = 500F;
         private float forward_acceleration = 80F;
         private float forward_speed = 0;
-        private float break_constant = 3f; //Constante por la cual se multiplica para que frene más rápido de lo que acelera
+        private float break_constant = 3.5f; //Constante por la cual se multiplica para que frene más rápido de lo que acelera
 
         //-----------------------------------------
 
@@ -65,11 +68,28 @@ namespace TGC.Group.Model
             var center = TGCVector3.Empty; //posicion inicial para la scene
             scene = loader.loadSceneFromFile(MediaDir + "Selva\\Selva-TgcScene.xml");
 
+            //------SKYBOX------//
+            skyBox = new TgcSkyBox();
+            skyBox.Center = TGCVector3.Empty;
+            skyBox.Size = new TGCVector3(10000, 10000, 10000);
+            var pathSkybox = MediaDir + "SkyBox\\";
+
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Front, pathSkybox + "Back.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Back, pathSkybox + "Front.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Left, pathSkybox + "Left.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Right, pathSkybox + "Right.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Up, pathSkybox + "Up.jpg");
+            skyBox.setFaceTexture(TgcSkyBox.SkyFaces.Down, pathSkybox + "Down.jpg");
+
+            skyBox.Init();
+
 
             //-------NAVE--------//
             ship = loader.loadSceneFromFile(MediaDir + "StarWars-Speeder\\StarWars-Speeder-TgcScene.xml").Meshes[0];
             ship.Position = new TGCVector3(0, 600, 0);
             ship.Rotation = new TGCVector3(0, FastMath.PI/2, 0);
+
+
            
             //-------CAMARA--------//
 
@@ -149,7 +169,8 @@ namespace TGC.Group.Model
             ship.Transform = TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
 
             camera.Target = ship.Position;
-            
+            skyBox.Center = Camara.Position;
+
 
 
             PostUpdate();
@@ -174,7 +195,7 @@ namespace TGC.Group.Model
             DrawText.drawText("Velocidad: " + forward_speed +"F",0,95, Color.LightYellow);
             DrawText.drawText("Posicion de la nave: X: " + ship.Position.X +
                                 " Y: " + ship.Position.Y + " Z: " + ship.Position.Z, 0,110, Color.LightYellow);
-            
+
 
             //Siempre antes de renderizar el modelo necesitamos actualizar la matriz de transformacion.
             //Debemos recordar el orden en cual debemos multiplicar las matrices, en caso de tener modelos jerárquicos, tenemos control total.
@@ -188,6 +209,7 @@ namespace TGC.Group.Model
             //Mesh.Render();
 
             //pista.Render();
+            skyBox.Render();
             ship.Render();
             scene.RenderAll();
 
@@ -211,6 +233,7 @@ namespace TGC.Group.Model
         {
             ship.Dispose();
             scene.DisposeAll();
+            skyBox.Dispose();
         }
     }
 }

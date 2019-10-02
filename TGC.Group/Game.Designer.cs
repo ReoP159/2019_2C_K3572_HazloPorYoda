@@ -61,7 +61,19 @@ namespace TGC.Group {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("..\\..\\Shaders\\")]
+        [global::System.Configuration.DefaultSettingValueAttribute("cajaMadera4.jpg")]
+        public string TexturaCaja {
+            get {
+                return ((string)(this["TexturaCaja"]));
+            }
+            set {
+                this["TexturaCaja"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("..\\..\\..\\Shaders\\")]
         public string ShadersDirectory {
             get {
                 return ((string)(this["ShadersDirectory"]));
@@ -73,25 +85,13 @@ namespace TGC.Group {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("..\\..\\Media\\")]
+        [global::System.Configuration.DefaultSettingValueAttribute("..\\..\\..\\Media\\")]
         public string MediaDirectory {
             get {
                 return ((string)(this["MediaDirectory"]));
             }
             set {
                 this["MediaDirectory"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("cajaMadera4.jpg")]
-        public string TexturaCaja {
-            get {
-                return ((string)(this["TexturaCaja"]));
-            }
-            set {
-                this["TexturaCaja"] = value;
             }
         }
     }

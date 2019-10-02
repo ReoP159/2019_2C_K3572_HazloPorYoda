@@ -4,6 +4,8 @@ using TGC.Core.Example;
 using TGC.Core.Mathematica;
 using TGC.Core.SceneLoader;
 using TGC.Core.Terrain;
+using TGC.Core.Input;
+using TGC.Core.Collision;
 
 
 
@@ -28,7 +30,15 @@ namespace TGC.Group.Model
 
         //variable para cargar la nave
         private TgcMesh ship;
+
+        //variable del Skybox
         private TgcSkyBox skyBox;
+
+
+        //variable para cargar los enemigos
+
+        private Enemy enemigo;
+        private TgcPickingRay pickingRay;
 
         //-------variables adicionales para la nave
 
@@ -46,6 +56,7 @@ namespace TGC.Group.Model
 
         //variable para cargar la escena 
         private TgcScene scene;
+        private Track pista;
 
         //variable para el boundingbox (caja de coliciones)
         private bool BoundingBox { get; set; }
@@ -61,12 +72,17 @@ namespace TGC.Group.Model
         ///     procesamiento que podemos pre calcular para nuestro juego.
         ///     Borrar el codigo ejemplo no utilizado.
         /// </summary>
+        /// 
+        private bool buliEne;
         public override void Init()
         {
             //-------ESCENA--------//
             var loader = new TgcSceneLoader(); //clase para cargar el terreno
             var center = TGCVector3.Empty; //posicion inicial para la scene
             scene = loader.loadSceneFromFile(MediaDir + "Selva\\Selva-TgcScene.xml");
+
+            var pathTextura = MediaDir + "Walls.jpg";
+            pista = new Track(center, pathTextura, 5);
 
             //------SKYBOX------//
             skyBox = new TgcSkyBox();
@@ -86,15 +102,22 @@ namespace TGC.Group.Model
 
             //-------NAVE--------//
             ship = loader.loadSceneFromFile(MediaDir + "StarWars-Speeder\\StarWars-Speeder-TgcScene.xml").Meshes[0];
-            ship.Position = new TGCVector3(0, 600, 0);
+            ship.Position = new TGCVector3(0, 0, 0);
             ship.Rotation = new TGCVector3(0, FastMath.PI/2, 0);
+            ship.Transform = TGCMatrix.Scaling(TGCVector3.One*0.5f) * TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
+
+            //------ENEMIGO------//
+
+            enemigo = new Enemy(MediaDir + "Enemy\\", new TGCVector3(0, 0, 200));
+            pickingRay = new TgcPickingRay(Input);
 
 
-           
             //-------CAMARA--------//
 
             camera = new CamaraNave(ship.Position,0);
             Camara = camera;
+
+            buliEne = true;
 
 
         }
@@ -109,7 +132,7 @@ namespace TGC.Group.Model
             PreUpdate();
 
             var side_movement = TGCVector3.Empty;
-            forward_movement = new TGCVector3(0,0,-1);
+            forward_movement = new TGCVector3(0, 0, -1);
 
 
             //Capturar Input teclado
@@ -119,35 +142,47 @@ namespace TGC.Group.Model
                 BoundingBox = !BoundingBox;
             }
             ///Movimiento-------------------
-            if (Input.keyDown(Key.S))
+            if (Input.keyDown(Key.S) && ship.Position.Y >= -160)
             {
                 side_movement.Y = -1;
             }
 
-            if (Input.keyDown(Key.W))
+            if (Input.keyDown(Key.W) && ship.Position.Y <= 160)
             {
                 side_movement.Y = 1;
             }
 
-            if (Input.keyDown(Key.D))
+            if (Input.keyDown(Key.D) && ship.Position.X >= -50)
             {
                 side_movement.X = -1;
             }
 
-            if (Input.keyDown(Key.A))
+            if (Input.keyDown(Key.A) && ship.Position.X <= 50)
             {
                 side_movement.X = 1;
             }
             ///Aceleracion -----------------------
             if (Input.keyDown(Key.Space))
             {
-                forward_speed = FastMath.Min(forward_speed + forward_acceleration * ElapsedTime,max_forward_speed);
-                //forward_movement.Z = -1;
+                forward_speed = FastMath.Min(forward_speed + forward_acceleration * ElapsedTime, max_forward_speed);
+                forward_movement.Z = -1;
             }
             else
             {
-                forward_speed = FastMath.Max(forward_speed-forward_acceleration*break_constant*ElapsedTime,0);
+                forward_speed = FastMath.Max(forward_speed - forward_acceleration * break_constant * ElapsedTime, 0);
             }
+
+            ///Control del enemigo
+
+            if (Input.buttonPressed(TgcD3dInput.MouseButtons.BUTTON_LEFT))
+            {
+                if (enemigo.DetectarClick(pickingRay))
+                {
+                    buliEne = !buliEne;
+                }
+            }
+
+            enemigo.Update(ElapsedTime);
 
             ///cambio posicion camara -----------------------
             if (Input.keyPressed(Key.C))
@@ -164,14 +199,13 @@ namespace TGC.Group.Model
             side_movement *= side_speed * ElapsedTime;
             
             forward_movement *= forward_speed * ElapsedTime;
-            ship.Position += side_movement + forward_movement;
+            pista.Move_forward(forward_movement);
+            ship.Position += side_movement;// + forward_movement;
             
             ship.Transform = TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
 
             camera.Target = ship.Position;
             skyBox.Center = Camara.Position;
-
-
 
             PostUpdate();
         }
@@ -211,7 +245,13 @@ namespace TGC.Group.Model
             //pista.Render();
             skyBox.Render();
             ship.Render();
-            scene.RenderAll();
+            //scene.RenderAll();
+            pista.Render();
+            if (buliEne)
+            {
+                enemigo.Render();
+            }
+           
 
             
 
@@ -219,6 +259,7 @@ namespace TGC.Group.Model
             if (BoundingBox)
             {
                 ship.BoundingBox.Render();
+                enemigo.BoundingBox().Render();
             }
 
             PostRender();

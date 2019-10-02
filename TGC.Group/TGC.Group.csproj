@@ -102,6 +102,7 @@
       <DependentUpon>Game.settings</DependentUpon>
     </Compile>
     <Compile Include="Model\Camaras.cs" />
+    <Compile Include="Model\Enemy.cs" />
     <Compile Include="Model\GameModel.cs" />
     <Compile Include="Model\Track.cs" />
     <Compile Include="Program.cs" />

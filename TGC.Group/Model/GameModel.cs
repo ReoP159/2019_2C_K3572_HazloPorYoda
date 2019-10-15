@@ -29,7 +29,7 @@ namespace TGC.Group.Model
         }
 
         //variable para cargar la nave
-        private TgcMesh ship;
+        private Player ship;
 
         //variable del Skybox
         private TgcSkyBox skyBox;
@@ -47,7 +47,7 @@ namespace TGC.Group.Model
 
         private TGCVector3 forward_movement = TGCVector3.Empty;
 
-        private float max_forward_speed = 500F;
+        private float max_forward_speed = 1000F;
         private float forward_acceleration = 80F;
         private float forward_speed = 0;
         private float break_constant = 3.5f; //Constante por la cual se multiplica para que frene más rápido de lo que acelera
@@ -99,12 +99,7 @@ namespace TGC.Group.Model
 
             skyBox.Init();
 
-
-            //-------NAVE--------//
-            ship = loader.loadSceneFromFile(MediaDir + "StarWars-Speeder\\StarWars-Speeder-TgcScene.xml").Meshes[0];
-            ship.Position = new TGCVector3(0, 0, 0);
-            ship.Rotation = new TGCVector3(0, FastMath.PI/2, 0);
-            ship.Transform = TGCMatrix.Scaling(TGCVector3.One*0.5f) * TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
+            this.ship = new Player(loader, MediaDir);
 
             //------ENEMIGO------//
 
@@ -152,12 +147,12 @@ namespace TGC.Group.Model
                 side_movement.Y = 1;
             }
 
-            if (Input.keyDown(Key.D) && ship.Position.X >= -50)
+            if (!Input.keyDown(Key.LeftShift) && Input.keyDown(Key.D) && ship.Position.X >= -50)
             {
                 side_movement.X = -1;
             }
 
-            if (Input.keyDown(Key.A) && ship.Position.X <= 50)
+            if (!Input.keyDown(Key.LeftShift) && Input.keyDown(Key.A) && ship.Position.X <= 50)
             {
                 side_movement.X = 1;
             }
@@ -203,6 +198,7 @@ namespace TGC.Group.Model
             ship.Position += side_movement;// + forward_movement;
             
             ship.Transform = TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
+            this.ship.Rotate(Input, ElapsedTime);
 
             camera.Target = ship.Position;
             skyBox.Center = Camara.Position;
@@ -258,7 +254,7 @@ namespace TGC.Group.Model
             //Render de BoundingBox, muy útil para debug de colisiones.
             if (BoundingBox)
             {
-                ship.BoundingBox.Render();
+                this.ship.RenderBoundingBox();
                 enemigo.BoundingBox().Render();
             }
 

@@ -71,28 +71,17 @@ namespace TGC.Group.Model
 
         public void Move_forward(TGCVector3 forward_movement)
         {
+            this.Move_forward(forward_movement, walls_l);
+            this.Move_forward(forward_movement, walls_r);
+            this.Move_forward(forward_movement, floors);
+        }
 
-            var bottom = center + new TGCVector3(0, 0, -320);
-
-            foreach (var mesh in walls_l) {
+        private void Move_forward(TGCVector3 forward_movement, List<TgcMesh> meshes)
+        {
+            foreach (var mesh in meshes)
+            {
                 mesh.Position += -forward_movement;// + forward_movement;
                 if (mesh.Position.Z > this.center.Z + 640)
-                {
-                    mesh.Position += new TGCVector3(0, 0, -640);
-                }
-                mesh.Transform = TGCMatrix.Translation(mesh.Position);
-           }
-            foreach (var mesh in walls_r) {
-                mesh.Position += -forward_movement;// + forward_movement;
-                if (mesh.Position.Z > this.center.Z + 640)
-                {
-                    mesh.Position += new TGCVector3(0, 0, -640);
-                }
-                mesh.Transform = TGCMatrix.Translation(mesh.Position);
-            }
-            foreach (var mesh in floors) {
-                mesh.Position += -forward_movement;// + forward_movement;
-                if(mesh.Position.Z > this.center.Z + 640)
                 {
                     mesh.Position += new TGCVector3(0, 0, -640);
                 }

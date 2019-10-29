@@ -42,13 +42,9 @@ namespace TGC.Group.Model
 
         //-------variables adicionales para la nave
 
-        /*private float side_acceleration = 5f;*/
-        private float side_speed = 100F;
-
         private TGCVector3 forward_movement = TGCVector3.Empty;
 
         private float max_forward_speed = 1000F;
-        private float forward_acceleration = 80F;
         private float forward_speed = 0;
         private float break_constant = 3.5f; //Constante por la cual se multiplica para que frene más rápido de lo que acelera
 
@@ -99,7 +95,7 @@ namespace TGC.Group.Model
 
             skyBox.Init();
 
-            this.ship = new Player(loader, MediaDir);
+            this.ship = new Player(loader, MediaDir, ShadersDir, Input);
 
             //------ENEMIGO------//
 
@@ -157,14 +153,14 @@ namespace TGC.Group.Model
                 side_movement.X = 1;
             }
             ///Aceleracion -----------------------
-            if (Input.keyDown(Key.Space))
+            if (Input.keyDown(Game.Default.AccelerationKey))
             {
-                forward_speed = FastMath.Min(forward_speed + forward_acceleration * ElapsedTime, max_forward_speed);
+                forward_speed = FastMath.Min(forward_speed + Game.Default.Acceleration * ElapsedTime, max_forward_speed);
                 forward_movement.Z = -1;
             }
             else
             {
-                forward_speed = FastMath.Max(forward_speed - forward_acceleration * break_constant * ElapsedTime, 0);
+                forward_speed = FastMath.Max(forward_speed - Game.Default.Acceleration * break_constant * ElapsedTime, 0);
             }
 
             ///Control del enemigo
@@ -191,14 +187,14 @@ namespace TGC.Group.Model
             camera.CambiarPosicionCamara(posicionCamara);
             
             
-            side_movement *= side_speed * ElapsedTime;
+            side_movement *= Game.Default.MoveSpeed * ElapsedTime;
             
             forward_movement *= forward_speed * ElapsedTime;
             pista.Move_forward(forward_movement);
             ship.Position += side_movement;// + forward_movement;
             
             ship.Transform = TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
-            this.ship.Rotate(Input, ElapsedTime);
+            this.ship.Update(ElapsedTime);
 
             camera.Target = ship.Position;
             skyBox.Center = Camara.Position;

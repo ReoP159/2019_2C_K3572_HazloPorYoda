@@ -15,10 +15,37 @@
       <Value Profile="(Default)">cajaMadera4.jpg</Value>
     </Setting>
     <Setting Name="ShadersDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)">..\..\..\Shaders\</Value>
+      <Value Profile="(Default)">..\..\Shaders\</Value>
     </Setting>
     <Setting Name="MediaDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)">..\..\..\Media\</Value>
+      <Value Profile="(Default)">..\..\Media\</Value>
+    </Setting>
+    <Setting Name="LeftKey" Type="Microsoft.DirectX.DirectInput.Key" Scope="User">
+      <Value Profile="(Default)">A</Value>
+    </Setting>
+    <Setting Name="RightKey" Type="Microsoft.DirectX.DirectInput.Key" Scope="User">
+      <Value Profile="(Default)">D</Value>
+    </Setting>
+    <Setting Name="UpKey" Type="Microsoft.DirectX.DirectInput.Key" Scope="User">
+      <Value Profile="(Default)">W</Value>
+    </Setting>
+    <Setting Name="DownKey" Type="Microsoft.DirectX.DirectInput.Key" Scope="User">
+      <Value Profile="(Default)">S</Value>
+    </Setting>
+    <Setting Name="RotationSpeed" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">0.01</Value>
+    </Setting>
+    <Setting Name="RollInterval" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">200</Value>
+    </Setting>
+    <Setting Name="AccelerationKey" Type="Microsoft.DirectX.DirectInput.Key" Scope="User">
+      <Value Profile="(Default)">Space</Value>
+    </Setting>
+    <Setting Name="Acceleration" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+    <Setting Name="MoveSpeed" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">200</Value>
     </Setting>
   </Settings>
 </SettingsFile>

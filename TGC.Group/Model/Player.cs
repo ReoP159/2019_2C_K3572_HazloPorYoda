@@ -1,4 +1,5 @@
-﻿using Microsoft.DirectX.DirectInput;
+﻿using Microsoft.DirectX.Direct3D;
+using Microsoft.DirectX.DirectInput;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,20 +8,30 @@ using System.Threading.Tasks;
 using TGC.Core.Input;
 using TGC.Core.Mathematica;
 using TGC.Core.SceneLoader;
+using TGC.Core.Shaders;
+using Effect = Microsoft.DirectX.Direct3D.Effect;
 
 namespace TGC.Group.Model
 {
     class Player
     {
-        private TgcSceneLoader loader;
-        private String mediaDir;
+        private readonly TgcSceneLoader loader;
+        private readonly String mediaDir;
+        private readonly TgcD3dInput input;
+        private readonly TgcMesh ship;
+        private readonly Effect rollEffect;
 
-        private TgcMesh ship;
+        private Key LastKeyPressed;
+        private int LastKeyPressedMillis;
+        private Boolean Rolling = false;
 
-        public Player(TgcSceneLoader loader, String mediaDir)
+        public Player(TgcSceneLoader loader, String mediaDir, String shadersDir, TgcD3dInput input)
         {
             this.loader = loader;
             this.mediaDir = mediaDir;
+            this.input = input;
+
+            rollEffect = TGCShaders.Instance.LoadEffect(shadersDir + "Varios.fx");
 
             ship = loader.loadSceneFromFile(mediaDir + "StarWars-Speeder\\StarWars-Speeder-TgcScene.xml").Meshes[0];
             ship.Position = new TGCVector3(0, 0, 0);
@@ -28,31 +39,17 @@ namespace TGC.Group.Model
             ship.Transform = TGCMatrix.Scaling(TGCVector3.One * 0.5f) * TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
         }
 
-        public void Rotate(TgcD3dInput input, float elapsedTime)
+        public void Update(float elapsedTime)
         {
-            float rotationSpeed = 0.01F;
-            TGCVector3 rotation = this.ship.Rotation;
-            if (input.keyDown(Key.LeftShift) && input.keyDown(Key.A))
+            if (this.Rolling)
             {
-                this.ship.RotateX(rotationSpeed);
-                rotation.X = Math.Min((float)Math.PI / 2, this.ship.Rotation.X);
+                this.DoRoll(elapsedTime);
             }
-            else if (input.keyDown(Key.LeftShift) && input.keyDown(Key.D))
+            else
             {
-                this.ship.RotateX(rotationSpeed * -1);
-                rotation.X = Math.Max((float)-Math.PI / 2, this.ship.Rotation.X);
-            } 
-            else if (this.ship.Rotation.X < 0)
-            {
-                this.ship.RotateX(rotationSpeed * 1);
-                rotation.X = Math.Min(0, this.ship.Rotation.X);
+                this.CheckRoll(elapsedTime);
+                this.DoRotate(elapsedTime);
             }
-            else if (this.ship.Rotation.X > 0)
-            {
-                this.ship.RotateX(rotationSpeed * -1);
-                rotation.X = Math.Max(0, this.ship.Rotation.X);
-            }
-            this.ship.Rotation = rotation;
         }
 
         public void Render()
@@ -87,5 +84,71 @@ namespace TGC.Group.Model
             get { return this.ship.Rotation; }
             set { this.ship.Rotation = value; }
         }
+
+        private void CheckRoll(float elapsedTime)
+        {
+            if (input.keyPressed(Game.Default.LeftKey))
+            {
+                this.SetRolling(Game.Default.LeftKey == LastKeyPressed && Environment.TickCount - LastKeyPressedMillis < Game.Default.RollInterval);
+                LastKeyPressed = Game.Default.LeftKey;
+                LastKeyPressedMillis = Environment.TickCount;
+            }
+            else if (input.keyPressed(Game.Default.RightKey))
+            {
+                this.SetRolling(Game.Default.RightKey == LastKeyPressed && Environment.TickCount - LastKeyPressedMillis < Game.Default.RollInterval);
+                LastKeyPressed = Game.Default.RightKey;
+                LastKeyPressedMillis = Environment.TickCount;
+            }
+        }
+
+        private void DoRoll(float elapsedTime)
+        {
+            TGCVector3 rotation = this.ship.Rotation;
+            if (Game.Default.LeftKey == LastKeyPressed)
+            {
+                this.ship.RotateX(Game.Default.RotationSpeed);
+                this.SetRolling(Math.PI * 2 > Math.Abs(this.ship.Rotation.X));
+                rotation.X = this.Rolling ? ship.Rotation.X : 0; 
+            }
+            else if (Game.Default.RightKey == LastKeyPressed)
+            {
+                this.ship.RotateX(Game.Default.RotationSpeed * -1);
+                this.SetRolling(Math.PI * 2 > Math.Abs(this.ship.Rotation.X));
+                rotation.X = this.Rolling ? ship.Rotation.X : 0;
+            }
+            this.ship.Rotation = rotation;
+        }
+
+        private void DoRotate(float elapsedTime)
+        {
+            TGCVector3 rotation = this.ship.Rotation;
+            if (this.input.keyDown(Key.LeftShift) && input.keyDown(Game.Default.LeftKey))
+            {
+                this.ship.RotateX(Game.Default.RotationSpeed);
+                rotation.X = Math.Min((float)Math.PI / 2, this.ship.Rotation.X);
+            }
+            else if (this.input.keyDown(Key.LeftShift) && input.keyDown(Game.Default.RightKey))
+            {
+                this.ship.RotateX(Game.Default.RotationSpeed * -1);
+                rotation.X = Math.Max((float)-Math.PI / 2, this.ship.Rotation.X);
+            }
+            else if (this.ship.Rotation.X < 0)
+            {
+                this.ship.RotateX(Game.Default.RotationSpeed * 1);
+                rotation.X = Math.Min(0, this.ship.Rotation.X);
+            }
+            else if (this.ship.Rotation.X > 0)
+            {
+                this.ship.RotateX(Game.Default.RotationSpeed * -1);
+                rotation.X = Math.Max(0, this.ship.Rotation.X);
+            }
+            this.ship.Rotation = rotation;
+        }
+
+        private void SetRolling(Boolean rolling)
+        {
+            this.Rolling = rolling;
+        }
+
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TGC.Core.Direct3D;
 using TGC.Core.Input;
 using TGC.Core.Mathematica;
 using TGC.Core.SceneLoader;
@@ -24,6 +25,7 @@ namespace TGC.Group.Model
         private Key LastKeyPressed;
         private int LastKeyPressedMillis;
         private Boolean Rolling = false;
+        private float Time = 0;
 
         public Player(TgcSceneLoader loader, String mediaDir, String shadersDir, TgcD3dInput input)
         {
@@ -31,9 +33,11 @@ namespace TGC.Group.Model
             this.mediaDir = mediaDir;
             this.input = input;
 
-            rollEffect = TGCShaders.Instance.LoadEffect(shadersDir + "Varios.fx");
+            rollEffect = TGCShaders.Instance.LoadEffect(shadersDir + "ShipRoll.fx");
 
             ship = loader.loadSceneFromFile(mediaDir + "StarWars-Speeder\\StarWars-Speeder-TgcScene.xml").Meshes[0];
+            ship.Effect = this.rollEffect;
+            ship.Technique = "Normal";
             ship.Position = new TGCVector3(0, 0, 0);
             ship.Rotation = new TGCVector3(0, FastMath.PI / 2, 0);
             ship.Transform = TGCMatrix.Scaling(TGCVector3.One * 0.5f) * TGCMatrix.RotationYawPitchRoll(ship.Rotation.Y, ship.Rotation.X, ship.Rotation.Z) * TGCMatrix.Translation(ship.Position);
@@ -52,8 +56,16 @@ namespace TGC.Group.Model
             }
         }
 
-        public void Render()
+        public void Render(float elapsedTime)
         {
+            Time += elapsedTime;
+            rollEffect.SetValue("time", Time);
+            // Cargar matrices de transformacion:
+            rollEffect.SetValue("matWorld", D3DDevice.Instance.Device.Transform.World);
+            rollEffect.SetValue("matWorldView", D3DDevice.Instance.Device.Transform.World *
+            D3DDevice.Instance.Device.Transform.View);
+            rollEffect.SetValue("matWorldViewProj", D3DDevice.Instance.Device.Transform.World *
+            D3DDevice.Instance.Device.Transform.View * D3DDevice.Instance.Device.Transform.Projection);
             this.ship.Render();
         }
 
@@ -148,6 +160,14 @@ namespace TGC.Group.Model
         private void SetRolling(Boolean rolling)
         {
             this.Rolling = rolling;
+            if (rolling)
+            {
+                this.ship.Technique = "Inmune";
+            }
+            else
+            {
+                this.ship.Technique = "Normal";
+            }
         }
 
     }

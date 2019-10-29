@@ -236,7 +236,7 @@ namespace TGC.Group.Model
 
             //pista.Render();
             skyBox.Render();
-            ship.Render();
+            ship.Render(ElapsedTime);
             //scene.RenderAll();
             pista.Render();
             if (buliEne)

@@ -33,7 +33,7 @@
       <Value Profile="(Default)">S</Value>
     </Setting>
     <Setting Name="RotationSpeed" Type="System.Single" Scope="User">
-      <Value Profile="(Default)">0.01</Value>
+      <Value Profile="(Default)">0.005</Value>
     </Setting>
     <Setting Name="RollInterval" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">200</Value>
